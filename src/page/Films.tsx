@@ -1,15 +1,18 @@
-import { useState, useEffect } from 'react';
- import { filmService } from '../services/filmService';
-import type { Film } from '../types';
+import { useState, useEffect } from "react";
+import { filmService } from "../services/filmService";
+import type { Film } from "../types";
+import { useNavigate } from "react-router-dom";
 
 export const Films = () => {
   const [films, setFilms] = useState<Film[]>([]);
   const [filteredFilms, setFilteredFilms] = useState<Film[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchType, setSearchType] = useState<'title' | 'actor' | 'genre'>('title');
-  const [selectedGenre, setSelectedGenre] = useState<any>('all');
-
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchType, setSearchType] = useState<"title" | "actor" | "genre">(
+    "title",
+  );
+  const [selectedGenre, setSelectedGenre] = useState<any>("all");
+   const navigate = useNavigate();
   useEffect(() => {
     fetchFilms();
   }, []);
@@ -26,7 +29,7 @@ export const Films = () => {
       setFilms(data);
       setFilteredFilms(data);
     } catch (error) {
-      console.error('Error fetching films:', error);
+      console.error("Error fetching films:", error);
     } finally {
       setLoading(false);
     }
@@ -43,21 +46,24 @@ export const Films = () => {
       const results = await filmService.search(searchTerm, searchType);
       setFilteredFilms(results);
     } catch (error) {
-      console.error('Error searching films:', error);
+      console.error("Error searching films:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const filterFilms = () => {
-    if (selectedGenre === 'all') {
+    if (selectedGenre === "all") {
       setFilteredFilms(films);
     } else {
-      setFilteredFilms(films.filter(film => film.genre === selectedGenre));
+      setFilteredFilms(films.filter((film) => film.genre === selectedGenre));
     }
   };
 
-  const genres = ['all', ...Array.from(new Set(films.map(f => f.genre).filter(Boolean)))];
+  const genres = [
+    "all",
+    ...Array.from(new Set(films.map((f) => f.genre).filter(Boolean))),
+  ];
 
   if (loading) {
     return (
@@ -66,7 +72,7 @@ export const Films = () => {
       </div>
     );
   }
-
+ 
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -85,13 +91,15 @@ export const Films = () => {
             placeholder={`Search by ${searchType}...`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            onKeyPress={(e) => e.key === "Enter" && handleSearch()}
             className="flex-1 bg-gray-900 border border-gray-700 rounded px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-gray-600"
           />
-          
+
           <select
             value={searchType}
-            onChange={(e) => setSearchType(e.target.value as 'title' | 'actor' | 'genre')}
+            onChange={(e) =>
+              setSearchType(e.target.value as "title" | "actor" | "genre")
+            }
             className="bg-gray-900 border border-gray-700 rounded px-4 py-2 text-white focus:outline-none focus:border-gray-600"
           >
             <option value="title">Title</option>
@@ -105,10 +113,10 @@ export const Films = () => {
           >
             Search
           </button>
-          
+
           <button
             onClick={() => {
-              setSearchTerm('');
+              setSearchTerm("");
               setFilteredFilms(films);
             }}
             className="bg-gray-700 text-white px-6 py-2 rounded font-medium hover:bg-gray-600 transition"
@@ -125,11 +133,11 @@ export const Films = () => {
               onClick={() => setSelectedGenre(genre)}
               className={`px-3 py-1 rounded text-sm font-medium transition ${
                 selectedGenre === genre
-                  ? 'bg-white text-gray-900'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  ? "bg-white text-gray-900"
+                  : "bg-gray-700 text-gray-300 hover:bg-gray-600"
               }`}
             >
-              {genre === 'all' ? 'All' : genre}
+              {genre === "all" ? "All" : genre}
             </button>
           ))}
         </div>
@@ -143,7 +151,10 @@ export const Films = () => {
             className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden hover:border-gray-600 transition"
           >
             <img
-              src={film.image_url || 'https://via.placeholder.com/300x450/1f2937/ffffff?text=No+Image'}
+              src={
+                film.image_url ||
+                "https://via.placeholder.com/300x450/1f2937/ffffff?text=No+Image"
+              }
               alt={film.title}
               className="w-full h-80 object-cover"
             />
@@ -172,7 +183,10 @@ export const Films = () => {
                 <span>{film.rental_count} rentals</span>
               </div>
 
-              <button className="w-full bg-white text-gray-900 py-2 rounded text-sm font-medium hover:bg-gray-200 transition">
+              <button
+                onClick={() => navigate(`/films/${film.film_id}`)}
+                className="w-full bg-white text-gray-900 py-2 rounded text-sm font-medium hover:bg-gray-200 transition"
+              >
                 View Details
               </button>
             </div>
@@ -181,9 +195,7 @@ export const Films = () => {
       </div>
 
       {filteredFilms.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
-          No films found
-        </div>
+        <div className="text-center py-12 text-gray-500">No films found</div>
       )}
     </div>
   );

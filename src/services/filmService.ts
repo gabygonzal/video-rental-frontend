@@ -1,7 +1,6 @@
-import type { Film } from "../types";
+import type { Film, RentalRequest } from "../types";
 import { api } from "./apis";
 
- 
 export const filmService = {
   // Get all films
   getAll: async () => {
@@ -23,9 +22,15 @@ export const filmService = {
     return response.data.data;
   },
 
-  // Get film by ID
+  // Get film by ID with actors
   getById: async (id: number) => {
     const response = await api.get(`/films/${id}`);
     return response.data.data;
+  },
+
+  // Rent a film
+  rentFilm: async (rentalData: RentalRequest) => {
+    const response = await api.post('/films/rent', rentalData);
+    return response.data;
   },
 };

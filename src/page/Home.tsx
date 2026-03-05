@@ -1,22 +1,28 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { filmService } from '../services/filmService';
-import type { Film } from '../types';
+import { actorService } from '../services/actorService';
+import type { Actor, Film } from '../types';
  
 export const Home = () => {
   const [topFilms, setTopFilms] = useState<Film[]>([]);
+  const [topActors, setTopActors] = useState<(Actor & { total_rentals?: number })[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchTopFilms();
+    fetchData();
   }, []);
 
-  const fetchTopFilms = async () => {
+  const fetchData = async () => {
     try {
-      const films = await filmService.getTop5();
+      const [films, actors] = await Promise.all([
+        filmService.getTop5(),
+        actorService.getTop5(),
+      ]);
       setTopFilms(films);
+      setTopActors(actors);
     } catch (error) {
-      console.error('Error fetching top films:', error);
+      console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
     }
@@ -88,6 +94,40 @@ export const Home = () => {
                   {film.title}
                 </h3>
                 <p className="text-xs text-gray-500">{film.rental_count} rentals</p>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Top 5 Actors */}
+      <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
+        <h2 className="text-2xl font-bold text-white mb-6">Top 5 Actors</h2>
+
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {topActors.map((actor, index) => (
+              <Link
+                key={actor.actor_id}
+                to={`/actors/${actor.actor_id}`}
+                className="group text-center"
+              >
+                <div className="relative">
+                  <div className="absolute -top-2 -left-2 bg-white text-gray-900 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm z-10">
+                    {index + 1}
+                  </div>
+                  <div className="w-full aspect-square bg-gray-700 rounded-lg flex items-center justify-center border border-gray-600 group-hover:border-gray-500 transition">
+                    <span className="text-6xl">👤</span>
+                  </div>
+                </div>
+                <h3 className="mt-2 font-medium text-white text-sm group-hover:text-gray-300 transition">
+                  {actor.first_name} {actor.last_name}
+                </h3>
+                <p className="text-xs text-gray-500">{actor.total_rentals} total rentals</p>
               </Link>
             ))}
           </div>
